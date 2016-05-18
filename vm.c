@@ -10,30 +10,63 @@ void vm_init_TLB() {
 }
 
 void vm_hit(TLB_entry *entry) {
-	// Cada vez que hay un hit, hace lo siguiente en la TLB_entry:
 	entry->stats.uses++;
 	//entry->stats.timestamp=stats.accesses;
+	//if (entry->stats.timestamp>10000000){
+	//	entry->stats.uses=0;
+	//}
 }
 
-/*
- * Updates the worst TLB entry with a new one.
- */
 void vm_miss(uint page, uint frame) {
 	int w;
-	w = elegirPeorTlb(); 
+	w = elegirElPeor();
 	TLB[w].page = page;
 	TLB[w].frame = frame;
+
 }
 
-int elegirPeorTlb(){ //Busco el con menos usos
+int peorMenosUso(){ //Busco el con menos usos
 	int peor;
-	peor = 1000;
+	peor = 10000000;
 	for(uint i=0; i<_tlb_size; i++)
 		if(TLB[i].stats.uses< peor) { 
 			peor = i; 
 		}
 
 	return peor;
+}
+
+int elegirElPeor(){ //Comparo los 2 peores segun uso por el mas antiguo
+	int peor1;
+	peor1 = peorMenosUso();
+	int peor2; //El segundo peor
+	int peor = 10000000;
+	for(uint i=0; i<_tlb_size; i++)
+		if(TLB[i].stats.uses< peor && i!=peor1) { 
+			peor2 = i; 
+		}
+	int peorDefinitivo ;
+	peorDefinitivo= usadoAntes(peor1,peor2);
+
+	return peorDefinitivo;
+}
+
+int peorUltimoUso(){
+	int peor = 0;
+	for(uint i=0; i<_tlb_size; i++)
+		if(TLB[i].stats.timestamp>peor) { 
+			peor = i; 
+		}
+	return peor;
+}
+
+int usadoAntes(int x, int y){
+	if(TLB[x].stats.timestamp>TLB[y].stats.timestamp) {
+		return 0;
+	}
+	else{
+		return 1;
+	}
 }
 
 void vm_init() {
@@ -46,9 +79,6 @@ void vm_init() {
 	vm_init_TLB();
 }
 
-/*
- * Checks the TLB to avoid loading the real page table if possible
- */
 int vm_in_tlb(int page, int *frame, int *idx) {
 	stats.time += tlb_time;
 	for(uint i=0; i<_tlb_size; i++)

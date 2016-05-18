@@ -1,3 +1,5 @@
 Cambios:
 
 - Valores iniciales de la TLB
+- Metodo de elegir peor
+- TODO: Agregar que se vayan reiniciando el uses despues de cierto tiempo

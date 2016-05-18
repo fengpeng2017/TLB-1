@@ -31,7 +31,7 @@ typedef struct TLB_entry_t {
 
 	struct {
 		char uses;
-		//int timestamp;
+		int timestamp;
 
 	} stats;
 } TLB_entry;
